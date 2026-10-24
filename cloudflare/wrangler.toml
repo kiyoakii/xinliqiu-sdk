@@ -1,0 +1,20 @@
+name = "xinliqiu-store"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# R2 bucket holding encrypted objects only.
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "xinliqiu-objects"
+
+# D1 database holding metadata only.
+[[d1_databases]]
+binding = "DB"
+database_name = "xinliqiu-index"
+database_id = "REPLACE_WITH_YOUR_D1_ID"
+
+# Set the bearer token with:
+#   wrangler secret put XINLIQIU_TOKEN
+# Never commit the token.
+[vars]
+# XINLIQIU_TOKEN is intentionally absent here; use `wrangler secret put`.

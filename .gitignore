@@ -1,0 +1,83 @@
+# Python environments, builds, and caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+uv.lock
+
+# Node and package-manager caches
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+
+# Cloudflare and local environment state
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+
+# Pairing, credentials, and stable local stores
+pairing*.json
+ksc*.json
+peer-id*.txt
+creds/
+credential/
+credentials/
+xinliqiu-creds/
+.credentials/
+secrets/
+xinliqiu-store/
+store-mirror/
+
+# Captures and recordings
+captures/
+capture/
+recordings/
+recording/
+rescue/
+*.part
+
+# Vendor packages and extraction/decompilation output
+*.apk
+*.apks
+*.xapk
+apk-extract/
+apk-extracted/
+extracted/
+extracted-sources/
+decompiled/
+jadx-out/
+jadx-output/
+
+# Keys, SPKI, and signing material
+*.pem
+*.key
+*.p8
+*.pkcs8
+*.der
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.spki
+*.spki.txt
+spki/
+keys/
+signing-keys/
+
+# Local logs and OS/editor files
+*.log
+.DS_Store
+.idea/
+.vscode/

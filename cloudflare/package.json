@@ -1,0 +1,16 @@
+{
+  "name": "xinliqiu-store",
+  "private": true,
+  "version": "0.2.1",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate": "./setup.sh migrate --remote",
+    "migrate:local": "./setup.sh migrate --local",
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
