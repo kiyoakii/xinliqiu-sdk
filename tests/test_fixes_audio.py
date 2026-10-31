@@ -626,6 +626,58 @@ class EnptKeyContractTests(unittest.TestCase):
             self.assertEqual(container.parse_marker(plain), 1700000000123)
 
 
+@unittest.skipUnless(_HAVE_CRYPTO, "cryptography not installed")
+class EnptExplicitAesKeyTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.owner = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    def setUp(self):
+        self.aes_key = os.urandom(32)
+        self.plaintext = b"synthetic payload for authenticated local decryption"
+        self.data = make_enpt(self.plaintext, self.owner.public_key(), aes_key=self.aes_key)
+
+    def test_direct_key_and_owner_key_return_same_authenticated_payload(self):
+        self.assertEqual(hb.decrypt_enpt_with_aes_key(self.data, self.aes_key), self.plaintext)
+        self.assertEqual(hb.decrypt_enpt(self.data, pem(self.owner)), self.plaintext)
+
+    def test_wrong_key_rejected(self):
+        with self.assertRaisesRegex(hb.DecryptError, "authentication"):
+            hb.decrypt_enpt_with_aes_key(self.data, os.urandom(32))
+
+    def test_ciphertext_nonce_and_tag_tampering_rejected(self):
+        for offset in (0x108, 0x118, len(self.data) - 24):
+            with self.subTest(offset=offset):
+                altered = bytearray(self.data)
+                altered[offset] ^= 1
+                with self.assertRaisesRegex(hb.DecryptError, "authentication"):
+                    hb.decrypt_enpt_with_aes_key(bytes(altered), self.aes_key)
+
+    def test_rejects_wrong_key_size_and_type_without_echoing_input(self):
+        for key in (b"", b"x" * 16, b"x" * 24, b"x" * 31, b"x" * 33,
+                    "sensitive-key-text", bytearray(32), None, 32):
+            with self.subTest(key_type=type(key).__name__):
+                with self.assertRaisesRegex(hb.DecryptError, "^AES key must be exactly 32 bytes$"):
+                    hb.decrypt_enpt_with_aes_key(self.data, key)
+
+    def test_structural_validation_still_applies(self):
+        for data in (b"", self.data[:-1], self.data + b"extra"):
+            with self.subTest(length=len(data)):
+                with self.assertRaises(hb.ContainerError):
+                    hb.decrypt_enpt_with_aes_key(data, self.aes_key)
+
+    def test_empty_authenticated_plaintext_is_valid(self):
+        data = make_enpt(b"", self.owner.public_key(), aes_key=self.aes_key)
+        self.assertEqual(hb.decrypt_enpt_with_aes_key(data, self.aes_key), b"")
+
+    def test_wrapped_key_metadata_does_not_claim_rsa_authentication(self):
+        altered = bytearray(self.data)
+        altered[8] ^= 1
+        self.assertEqual(hb.decrypt_enpt_with_aes_key(bytes(altered), self.aes_key), self.plaintext)
+        with self.assertRaises(hb.DecryptError):
+            hb.decrypt_enpt(bytes(altered), pem(self.owner))
+
+
 # --- SecureChannel ------------------------------------------------------------
 
 

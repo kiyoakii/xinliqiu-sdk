@@ -52,6 +52,13 @@ A verified protocol outcome does not prove global inventory, future device behav
 
 `decrypt_enpt(data, private_key)` requires an RSA-2048 private key and returns plaintext only after AES-GCM authentication. `to_wav` is a separate export operation and does not discover keys. Sync and storage do not implicitly produce plaintext.
 
+`decrypt_enpt_with_aes_key(data, aes_key)` is a Python-only alternative for an
+authorized caller that already holds the exact 32-byte per-payload AES key.
+It preserves envelope validation and GCM authentication, but does not unwrap
+or authenticate the embedded RSA-wrapped key or key-version metadata. It does
+not discover keys, enroll a device, or change sync/storage or CLI behavior.
+Per-payload AES keys are secret material and must stay out of logs and storage.
+
 Use generated output names rather than device-supplied paths. Treat captured names, diagnostics, and JSONL as untrusted data even when transport authentication succeeded.
 
 ## Operational safeguards

@@ -92,7 +92,7 @@ xinliqiu sync 0 <past-device-time-ms> --out ./captures \
   --store local --store-path ./xinliqiu-store
 ```
 
-支持 CMPT、direct enpt 和 JSONL 分类。有效密文可上传；明文诊断和未知内容默认留在本地并列入 `not_uploaded`。解密必须显式提供 owner 私钥。凭据、密钥、录音和真实设备标识不要提交到仓库。
+支持 CMPT、direct enpt 和 JSONL 分类。有效密文可上传；明文诊断和未知内容默认留在本地并列入 `not_uploaded`。CLI 解密必须显式提供 owner 私钥；Python 也支持显式提供单个文件的 AES 密钥，详见 [Python API](python/README.md#explicit-per-payload-aes-keys)。凭据、密钥、录音和真实设备标识不要提交到仓库。
 
 详见 [Storage](docs/storage.md)、[Security](docs/security.md) 和 [SECURITY.md](SECURITY.md)。
 

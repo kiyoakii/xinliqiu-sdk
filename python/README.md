@@ -71,6 +71,26 @@ for path in result["files"]:
 
 For audio entries, use `to_ogg` or `to_wav` only after checking the declared layout. Use `parse_marker` for `end-marker` and `mark`. `Entry.output_name()` and `generated_output_name()` avoid trusting device names as paths.
 
+## Explicit per-payload AES keys
+
+When an authorized caller already holds the exact 32-byte AES key for an enpt
+payload, the Python API can authenticate and decrypt it directly:
+
+```python
+from aipin_sdk import decrypt_enpt_with_aes_key
+
+plaintext = decrypt_enpt_with_aes_key(encrypted_payload, per_payload_aes_key)
+```
+
+The function obtains no keys and performs no device, file, or network operations.
+It validates the envelope and returns plaintext only after the AES-GCM tag
+verifies; wrong keys or modified ciphertext, nonce, or tag raise `DecryptError`.
+The embedded RSA-wrapped key and key-version fields remain parsed metadata;
+this API does not authenticate those fields or verify RSA ownership. Protect
+per-payload keys as secrets. `decrypt_enpt` retains its RSA-2048 owner-key
+contract, and the CLI continues to require the owner key. Neither API changes
+INIT authorization requirements.
+
 ## Storage and outcomes
 
 `ingest_files` uses the same classification shown above. Valid supported ciphertext can upload; plaintext diagnostics and unknown content remain local in `not_uploaded`. `EncryptedDiagnosticPolicy` is an explicit library opt-in for caller-encrypted diagnostics; plaintext-returning policies are rejected.
