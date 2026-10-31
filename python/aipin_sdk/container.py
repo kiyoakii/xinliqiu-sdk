@@ -377,6 +377,34 @@ def parse_enpt(data: bytes) -> EnptInfo:
     )
 
 
+def _decrypt_enpt_aes(info: EnptInfo, aes_key: bytes) -> bytes:
+    try:
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    except ImportError as exc:  # pragma: no cover
+        raise ContainerError(
+            "decryption requires the 'cryptography' package: pip install xinliqiu-sdk"
+        ) from exc
+    try:
+        return AESGCM(aes_key).decrypt(info.nonce, info.ciphertext + info.tag, None)
+    except Exception as exc:  # noqa: BLE001
+        raise DecryptError("AES-GCM authentication failed") from exc
+
+
+def decrypt_enpt_with_aes_key(data: bytes, aes_key: bytes) -> bytes:
+    """Verify and decrypt an enpt payload with an explicit per-payload AES key.
+
+    Requires exactly 32 bytes. Raises ContainerError for a malformed envelope
+    and DecryptError for an invalid key or failed authentication. Nothing is
+    returned before the GCM tag verifies. This function does not obtain keys,
+    unwrap RSA, change the device, or perform I/O. The wrapped-key and key-version
+    fields are parsed metadata, not authenticated by this direct-key API.
+    """
+    info = parse_enpt(data)
+    if not isinstance(aes_key, bytes) or len(aes_key) != ENPT_AES_KEY:
+        raise DecryptError("AES key must be exactly 32 bytes")
+    return _decrypt_enpt_aes(info, aes_key)
+
+
 def decrypt_enpt(data: bytes, private_key_pem: bytes | Path | str) -> bytes:
     """Unwrap the AES key with RSA-OAEP-less PKCS#1 v1.5 and verify GCM.
 
@@ -387,7 +415,6 @@ def decrypt_enpt(data: bytes, private_key_pem: bytes | Path | str) -> bytes:
     """
     try:
         from cryptography.hazmat.primitives.asymmetric import padding, rsa
-        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
         from cryptography.hazmat.primitives.serialization import load_pem_private_key
     except ImportError as exc:  # pragma: no cover
         raise ContainerError(
@@ -420,7 +447,4 @@ def decrypt_enpt(data: bytes, private_key_pem: bytes | Path | str) -> bytes:
         raise DecryptError(
             "RSA unwrap did not yield a 32-byte AES key: private key does not match this payload"
         )
-    try:
-        return AESGCM(aes_key).decrypt(info.nonce, info.ciphertext + info.tag, None)
-    except Exception as exc:  # noqa: BLE001
-        raise DecryptError("AES-GCM authentication failed") from exc
+    return _decrypt_enpt_aes(info, aes_key)

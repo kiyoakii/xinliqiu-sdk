@@ -14,8 +14,8 @@ Quick start::
     print(ball.capabilities())
 
 Range retrieval can include CMPT/enpt and plaintext JSONL diagnostics. Storage
-uploads are ciphertext-only by policy; decryption always requires an explicit
-owner private key supplied by the caller. Device operations with uncertain
+uploads are ciphertext-only by policy; decryption always requires explicit
+key material supplied by the caller. Device operations with uncertain
 outcomes return dictionaries containing ``state``, ``ok`` and ``retry``;
 :meth:`Xinliqiu.require_ok` optionally converts a non-success to
 :class:`OperationIncomplete`.
@@ -33,6 +33,7 @@ from .container import (
     audio_variant_of,
     cmpt_kind_of,
     decrypt_enpt,
+    decrypt_enpt_with_aes_key,
     extension_of,
     generated_output_name,
     name_is_safe,
@@ -182,6 +183,7 @@ __all__ = [
     "compare",
     "config_path",
     "decrypt_enpt",
+    "decrypt_enpt_with_aes_key",
     "default_owner_key_path",
     "derive_storage_device_id",
     "describe",

@@ -32,7 +32,7 @@ Out of scope for this repository:
 | Pairing and owner private keys are not sent to storage | provisioning, config, storage APIs |
 | Files publish only after size/digest sealing and peer completion | protocol sync/file transfer |
 | Range and INIT verification are distinct from writes or acceptance | client and protocol outcome handling |
-| Decryption requires an explicit owner key and authenticated GCM | `decrypt_enpt` |
+| Decryption requires explicit caller-supplied key material and authenticated GCM | `decrypt_enpt`, `decrypt_enpt_with_aes_key` |
 | Generic signing remains caller-supplied; no embedded private identity | `Signer`, `Pkcs8Signer`, external adapters |
 | Worker and clients verify content hashes | Worker, storage, mirror sync |
 
